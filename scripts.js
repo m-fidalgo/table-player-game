@@ -1,4 +1,4 @@
-var field, player;
+var field, player, field;
 
 class Field {
   constructor(cols, rows, containerId) {
@@ -49,7 +49,9 @@ class Character {
     this.x = x;
     this.y = y;
     this.table = field;
-    this.setPosition(this.x, this.y);
+    if (!this.setPosition(this.x, this.y)) {
+      throw Error();
+    }
   }
 
   up() {
@@ -83,7 +85,9 @@ class Character {
       this.y = y;
       this.table.field[this.y][this.x] = this.face;
       this.table.drawField();
+      return true;
     }
+    return false;
   }
 }
 
@@ -93,5 +97,46 @@ class Player extends Character {
   }
 }
 
-field = new Field(3, 4, "#myTable");
-player = new Player(field);
+class Npc extends Character {
+  constructor(field) {
+    var x = Math.trunc(Math.random() * field.cols);
+    var y = Math.trunc(Math.random() * field.rows);
+
+    super(field, x, y, ">_<");
+
+    setInterval(this.walk.bind(this), 500);
+  }
+
+  walk() {
+    var direction = Math.trunc(Math.random() * 4) + 1;
+
+    switch (direction) {
+      case 1:
+        this.up();
+        break;
+      case 2:
+        this.down();
+        break;
+      case 3:
+        this.left();
+        break;
+      case 4:
+        this.right();
+        break;
+    }
+  }
+}
+
+function startGame() {
+  field = new Field(3, 4, "#myTable");
+
+  try {
+    player = new Player(field);
+    npc = new Npc(field);
+  } catch (e) {
+    console.log("Error! Starting again");
+    startGame();
+  }
+}
+
+startGame();
